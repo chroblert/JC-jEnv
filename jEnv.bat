@@ -1,12 +1,8 @@
 @echo off
-rem jenv version 显示当前所有的java版本
-rem jenv local 1.8 设置java版本，只在当前shell下起作用
-rem jenv global 1.8 设置java版本，在全局下都起作用
-rem jenv add 目录 alias 添加一个java。添加后，自动创建别名 java_alias
-rem jenv alias list
+chcp 65001
+@REM AUTHOR: JC0o0l,Jerrybird
+@REM description: java环境切换管理工具
 
-set JCTest="CCCC"
-echo %0
 if "%1" == "local" (
     echo [+] jenv local alias
     goto switch_local 
@@ -23,8 +19,16 @@ if "%1" == "add" (
 )
 
 :usage
-    echo 'jenv [options]'
+    echo jenv [options]
+    echo jenv version 显示当前所有的java版本
+    echo jenv local 1.8 设置java版本，只在当前shell下起作用
+    echo jenv global 1.8 设置java版本，在全局下都起作用
+    echo jenv add 目录 alias 
+    goto end
 
+:aliaslist
+
+    goto end
 :switch_local
     call refreshenv
     set Java_env=%2
@@ -35,26 +39,14 @@ if "%1" == "add" (
         set java_path=%TMP_JAVAHOME%\bin
     ) 
     echo %java_path%
-    echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
-    set notexist=%errorlevel%
-    echo %notexist%
-    if NOT  "%java_path%" == "" (
+    @REM echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
+    @REM set notexist=%errorlevel%
+    @REM echo %notexist%
+    if "%java_path%" == "" (
         @REM 将(,)转义为^(,^)
-        if %notexist% equ 1 (
-            echo "not include"
-            @REM echo %path%
-            @REM set path=%java_path%;%path%
-        ) else (
-            echo "include"
-            set "path=%java_path%;%path%"
-        )
+        goto end
     )
-    echo path: "%path%"
-    echo tmpl_path:  %tmpl_path%
-    echo tmplf_path: %tmplf_path%
-    @REM echo "%path%"
-    set tmpl_path=
-    set tmplf_path=
+    set "path=%java_path%;%path%"
     set java_path=
     set TMP_JAVAHOME=
     goto end
@@ -65,33 +57,36 @@ if "%1" == "add" (
     @REM 多重变量嵌套
     call set TMP_JAVAHOME=%%%Java_env%%%
     set java_path=
-    if NOT "%2" == "" (
-        set java_path=%TMP_JAVAHOME%\bin
+    if "%2" == "" (
+        goto end
     ) 
-    echo %java_path%
-    echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
-    set notexist=%errorlevel%
-    echo %notexist%
-    if NOT  "%java_path%" == "" (
-        @REM 将(,)转义为^(,^)
-        if %notexist% equ 1 (
-            echo "not include"
-            @REM echo %path%
-            @REM set path=%java_path%;%path%
-        ) else (
-            echo "include"
-            %SystemRoot%\system32\setx path "%java_path%;%path%"
-        )
+    set java_path=%TMP_JAVAHOME%\bin
+    @REM echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
+    @REM set notexist=%errorlevel%
+    @REM echo %notexist%
+    if "%java_path%" == "" (
+        goto end
     )
-    echo path: "%path%"
-    echo tmpl_path:  %tmpl_path%
-    echo tmplf_path: %tmplf_path%
+    REM 设置java_home环境变量
+    reg delete HKCU\Environment /v JAVA_HOME /f
+    reg add HKCU\Environment  /v JAVA_HOME /t REG_SZ /d %TMP_JAVAHOME%  /f
+    setx JAVA_HOME %TMP_JAVAHOME%
+    REM 更新本shell中path
+    set "path=%java_path%;%path%"
+    set "JAVA_HOME=%TMP_JAVAHOME%"
     @REM echo "%path%"
-    set tmpl_path=
-    set tmplf_path=
     set java_path=
     set TMP_JAVAHOME=
     goto end
+
+:setpathusereg
+    echo 使用注册表设置PATH环境变量
+    echo %~1   %~2
+    reg delete HKCU\Environment /v %~1 /f
+    reg add HKCU\Environment  /v %~1 /t REG_SZ /d "%~2"  /f
+    call refreshenv
+    goto :EOF
+    @REM reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v JAVA_HOME /t REG_SZ /d "%~1" /f
 
 
 :addjdk
@@ -107,7 +102,7 @@ if "%1" == "add" (
     echo 已为%JDK_DIR%\bin\java.exe设置别名%JDK_ALIAS%
     rem 刷新环境变量
     call :refreshenv
- 
+
 :refreshenv
 @echo off
 ::

@@ -26,39 +26,73 @@ if "%1" == "add" (
     echo 'jenv [options]'
 
 :switch_local
+    call refreshenv
     set Java_env=%2
     @REM 多重变量嵌套
     call set TMP_JAVAHOME=%%%Java_env%%%
-    set tmp_path=
+    set java_path=
     if NOT "%2" == "" (
-        set tmp_path=%TMP_JAVAHOME%\bin
+        set java_path=%TMP_JAVAHOME%\bin
     ) 
-    echo %tmp_path%
+    echo %java_path%
     echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
     set notexist=%errorlevel%
-    setlocal enabledelayedexpansion
-    if NOT  "%tmp_path%" == "" (
+    echo %notexist%
+    if NOT  "%java_path%" == "" (
         @REM 将(,)转义为^(,^)
         if %notexist% equ 1 (
             echo "not include"
             @REM echo %path%
-            @REM set path=%tmp_path%;%path%
+            @REM set path=%java_path%;%path%
         ) else (
             echo "include"
-            set tmpl_path="%path:(=^(%"
-            echo %tmpl_path%
-            set tmplf_path=!tmpl_path:)=^)!
-            @REM echo %tmplf_path%
-            set path=%tmp_path%;!tmplf_path:"=!
+            set "path=%java_path%;%path%"
         )
     )
-    setlocal disabledelayedexpansion
-    @REM echo %path%
+    echo path: "%path%"
+    echo tmpl_path:  %tmpl_path%
+    echo tmplf_path: %tmplf_path%
+    @REM echo "%path%"
+    set tmpl_path=
+    set tmplf_path=
+    set java_path=
+    set TMP_JAVAHOME=
     goto end
 
 :switch_global
-    
+    call refreshenv
+    set Java_env=%2
+    @REM 多重变量嵌套
+    call set TMP_JAVAHOME=%%%Java_env%%%
+    set java_path=
+    if NOT "%2" == "" (
+        set java_path=%TMP_JAVAHOME%\bin
+    ) 
+    echo %java_path%
+    echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
+    set notexist=%errorlevel%
+    echo %notexist%
+    if NOT  "%java_path%" == "" (
+        @REM 将(,)转义为^(,^)
+        if %notexist% equ 1 (
+            echo "not include"
+            @REM echo %path%
+            @REM set path=%java_path%;%path%
+        ) else (
+            echo "include"
+            %SystemRoot%\system32\setx path "%java_path%;%path%"
+        )
+    )
+    echo path: "%path%"
+    echo tmpl_path:  %tmpl_path%
+    echo tmplf_path: %tmplf_path%
+    @REM echo "%path%"
+    set tmpl_path=
+    set tmplf_path=
+    set java_path=
+    set TMP_JAVAHOME=
     goto end
+
 
 :addjdk
     rem echo [+] jenv add jdk_dir alias

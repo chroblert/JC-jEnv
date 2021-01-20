@@ -34,38 +34,30 @@ if "%1" == "add" (
         set tmp_path=%TMP_JAVAHOME%\bin
     ) 
     echo %tmp_path%
+    echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
+    set notexist=%errorlevel%
+    setlocal enabledelayedexpansion
     if NOT  "%tmp_path%" == "" (
         @REM 将(,)转义为^(,^)
-        set tmpl_path="%path:(=^(%"
-        set tmplf_path=%tmpl_path:)=^)%
-        echo "%tmplf_path%"
-        set path=%tmp_path%;%tmplf_path:"=%
+        if %notexist% equ 1 (
+            echo "not include"
+            @REM echo %path%
+            @REM set path=%tmp_path%;%path%
+        ) else (
+            echo "include"
+            set tmpl_path="%path:(=^(%"
+            echo %tmpl_path%
+            set tmplf_path=!tmpl_path:)=^)!
+            @REM echo %tmplf_path%
+            set path=%tmp_path%;!tmplf_path:"=!
+        )
     )
+    setlocal disabledelayedexpansion
     @REM echo %path%
     goto end
 
 :switch_global
-    set Java_env=%2
-    @REM 多重变量嵌套
-    call set TMP_JAVAHOME=%%%Java_env%%%
-    set tmp_path=
-    if NOT "%2" == "" (
-        set tmp_path=%TMP_JAVAHOME%\bin
-    ) 
-    echo %tmp_path%
-    if NOT  "%tmp_path%" == "" (
-        @REM 将(,)转义为^(,^)
-        set tmpl_path="%path:(=^(%"
-        set tmplf_path=%tmpl_path:)=^)%
-        @REM echo %tmplf_path%
-        set tt_path=%tmp_path%;%tmplf_path%
-        @REM 再来一遍
-        @REM set tmpl_path="%tt_path:(=^(%"
-        @REM set tmplf_path=%tmpl_path:)=^)%
-        echo "%tt_path:"=%"
-        %SystemRoot%\system32\setx PATH "%tt_path:"=%"
-    )
-    @REM echo %path%
+    
     goto end
 
 :addjdk

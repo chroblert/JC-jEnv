@@ -30,12 +30,25 @@ if "%1" == "version" (
 )
 
 :usage
-    echo jenv [options]
-    echo jenv version 显示当前所有的java版本
-    echo jenv local 1.8 设置java版本，只在当前shell下起作用
-    echo jenv global 1.8 设置java版本，在全局下都起作用
-    echo jenv add 目录 alias 
-    echo jenv del alias
+    echo ================================================
+    echo ^| JC-jEnv
+    echo ^| Despt:  windows Java环境管理工具
+    echo ^| Author: JC0o0l,Jerrybird
+    echo ^| Repo:   https://github.com/chroblert/JC-jEnv.git
+    echo ================================================
+    echo.
+    echo 使用说明
+    echo  jenv [options]
+    echo       version 
+    echo         - 显示当前所有的java版本
+    echo       local alias 
+    echo         - 设置java版本，只在当前shell下起作用
+    echo       global alias 
+    echo         - 设置java版本，在全局下都起作用
+    echo       add 目录 alias 
+    echo         - add a version 
+    echo       del alias     
+    echo         - delete a version
     goto end
 
 :version
@@ -44,12 +57,23 @@ if "%1" == "version" (
         goto usage
     )
     @REM 枚举JC_jEnv环境变量中的值
-    @REM :GOON
-    for /f "delims=;, tokens=1,*" %%i in ("%JC_jEnv%") do (
-        echo %%i %%j
-        set str="%%j"
-        @REM goto GOON
+    echo.
+    echo all version:
+    set remain=%JC_jEnv%
+:loop
+    for /f "delims=;, tokens=1*" %%i in ("%remain%") do (
+        @REM echo %%i
+        call set value=%%%%i%%
+        set var=%%i
+        if "%value%" equ "%JAVA_HOME%" (
+            echo * %var% %value%
+        ) else (
+            echo   %var% %value%
+        )
+        set remain=%%j
+        @REM goto loop
     )
+    if defined remain goto :loop
     goto end
 @REM 导出配置到文件
 :export
@@ -59,7 +83,7 @@ if "%1" == "version" (
 :import
     goto end
 :switch_local
-    call refreshenv
+    @REM call refreshenv
     set Java_env=%2
     @REM 多重变量嵌套
     call set TMP_JAVAHOME=%%%Java_env%%%
@@ -67,21 +91,19 @@ if "%1" == "version" (
     if NOT "%2" == "" (
         set java_path=%TMP_JAVAHOME%\bin
     ) 
-    echo %java_path%
-    @REM echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
-    @REM set notexist=%errorlevel%
-    @REM echo %notexist%
     if "%java_path%" == "" (
         @REM 将(,)转义为^(,^)
         goto end
     )
     set "path=%java_path%;%path%"
+    set "JAVA_HOME=%TMP_JAVAHOME%"
+    echo  已切换到%2 %java_path%
     set java_path=
     set TMP_JAVAHOME=
     goto end
 
 :switch_global
-    call refreshenv
+    @REM call refreshenv
     set Java_env=%2
     @REM 多重变量嵌套
     call set TMP_JAVAHOME=%%%Java_env%%%
@@ -90,17 +112,17 @@ if "%1" == "version" (
         goto end
     ) 
     set java_path=%TMP_JAVAHOME%\bin
-    @REM echo "%path%"|%SystemRoot%\system32\findstr "(" >nul
-    @REM set notexist=%errorlevel%
-    @REM echo %notexist%
     if "%java_path%" == "" (
         goto end
     )
     REM 设置java_home环境变量
-    reg delete HKCU\Environment /v JAVA_HOME /f
-    reg add HKCU\Environment  /v JAVA_HOME /t REG_SZ /d %TMP_JAVAHOME%  /f
-    setx JAVA_HOME %TMP_JAVAHOME%
-    REM 更新本shell中path
+    reg delete HKCU\Environment /v JAVA_HOME /f >null
+    echo  .使用reg删除以前的JAVA_HOME %JAVA_HOME%
+    reg add HKCU\Environment  /v JAVA_HOME /t REG_SZ /d %TMP_JAVAHOME%  /f >null
+    echo  .使用reg创建新的JAVA_HOME %TMP_JAVAHOME%
+    setx JAVA_HOME %TMP_JAVAHOME% >null
+    echo  .使用setx更新JAVA_HOME
+    @REM 更新本shell中path
     set "path=%java_path%;%path%"
     set "JAVA_HOME=%TMP_JAVAHOME%"
     @REM echo "%path%"
@@ -241,4 +263,5 @@ goto main
 
 
 :end
+    echo.
     echo Done

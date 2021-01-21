@@ -163,7 +163,7 @@ if "%1" == "version" (
     )
     rem 添加至用户环境变量中
     %SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >null
-    echo/%SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >>f:/JC_jEnv.cmd
+    @REM echo/%SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >>f:/JC_jEnv.cmd
     echo "%JC_jEnv%"|%SystemRoot%\system32\findstr "%JDK_ALIAS%" >nul
     set notexist=%errorlevel%
     @REM 环境变量JC_jEnv中已存在当前要添加JAVA_ALIAS
@@ -175,14 +175,14 @@ if "%1" == "version" (
     if "%JC_jEnv%" == "" (
         echo 用户环境变量中没有JC_jEnv
         %SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%" >null
-        echo/%SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%" >>f:/JC_jEnv.cmd
+        @REM echo/%SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%" >>f:/JC_jEnv.cmd
     ) else (
         %SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%;%JC_jEnv%" >null
-        echo/%SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%;%JC_jEnv%" >>f:/JC_jEnv.cmd
+        @REM echo/%SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%;%JC_jEnv%" >>f:/JC_jEnv.cmd
     )
     rem 设置别名
     %SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $*   >null
-    echo/%SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $* >>f:/JC_jEnv.cmd
+    @REM echo/%SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $* >>f:/JC_jEnv.cmd
 
     echo 已为%JDK_DIR%\bin\java.exe设置别名%JDK_ALIAS%
     @REM 清空定义的变量

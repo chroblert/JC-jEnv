@@ -25,6 +25,10 @@ if "%1" == "del" (
     goto deljdk
 )
 
+if "%1" == "version" (
+    goto version
+)
+
 :usage
     echo jenv [options]
     echo jenv version 显示当前所有的java版本
@@ -35,7 +39,17 @@ if "%1" == "del" (
     goto end
 
 :version
-
+    if "%JC_jEnv" == "" (
+        echo 当前没有设置任何版本
+        goto usage
+    )
+    @REM 枚举JC_jEnv环境变量中的值
+    @REM :GOON
+    for /f "delims=;, tokens=1,*" %%i in ("%JC_jEnv%") do (
+        echo %%i %%j
+        set str="%%j"
+        @REM goto GOON
+    )
     goto end
 @REM 导出配置到文件
 :export
@@ -104,11 +118,14 @@ if "%1" == "del" (
     @REM reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v JAVA_HOME /t REG_SZ /d "%~1" /f
 
 :deljdk
-    @REM 删除某个版本的jdk
-    reg delete HKCU\Environment /v %~2 /f
+    if NOT "%~2" == "" (
+        @REM 删除某个版本的jdk
+        reg delete HKCU\Environment /v %~2 /f >null
+    )
     call set t_JC_jEnv=%%JC_jEnv:;%~2=%%
     call setx JC_jEnv %%t_JC_jEnv:%~2;=%%
     call set JC_jEnv=%%t_JC_jEnv:%~2;=%%
+    set %~2=
     goto refreshenv
 :addjdk
     rem echo [+] jenv add jdk_dir alias
@@ -116,12 +133,18 @@ if "%1" == "del" (
     if "%2" == "" goto end
     set JDK_ALIAS=%3
     set JDK_DIR=%2
+    @REM 判断是否存在JDK_ALIAS别名
+    call set t_temp=%%%JDK_ALIAS%%%
+    if NOT "%t_temp%" == "" (
+        echo %JDK_ALIAS%已经存在
+        goto end
+    )
     rem 添加至用户环境变量中
     %SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >null
     echo/%SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >>f:/JC_jEnv.cmd
     echo "%JC_jEnv%"|%SystemRoot%\system32\findstr "%JDK_ALIAS%" >nul
     set notexist=%errorlevel%
-    @REM 环境变量中已存在当前要添加JAVA_ALIAS
+    @REM 环境变量JC_jEnv中已存在当前要添加JAVA_ALIAS
     if %notexist% == 0 (
         echo 已设置过该版本的java
         goto end
@@ -218,4 +241,4 @@ goto main
 
 
 :end
-    echo '设置完成'
+    echo Done

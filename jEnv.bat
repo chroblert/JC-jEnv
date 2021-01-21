@@ -65,7 +65,7 @@ if "%1" == "version" (
         @REM echo %%i
         call set value=%%%%i%%
         set var=%%i
-        if "%value%" equ "%JAVA_HOME%" (
+        if /i "%value%" equ "%JAVA_HOME%" (
             echo * %var% %value%
         ) else (
             echo   %var% %value%
@@ -98,6 +98,8 @@ if "%1" == "version" (
     set "path=%java_path%;%path%"
     set "JAVA_HOME=%TMP_JAVAHOME%"
     echo  已切换到%2 %java_path%
+    @REM rem 设置别名
+    %SystemRoot%\system32\doskey %2=%JAVA_HOME%\bin\java.exe $*   >null
     set java_path=
     set TMP_JAVAHOME=
     goto end
@@ -125,6 +127,8 @@ if "%1" == "version" (
     @REM 更新本shell中path
     set "path=%java_path%;%path%"
     set "JAVA_HOME=%TMP_JAVAHOME%"
+    @REM rem 设置别名
+    %SystemRoot%\system32\doskey %2=%JAVA_HOME%\bin\java.exe $*   >null
     @REM echo "%path%"
     set java_path=
     set TMP_JAVAHOME=
@@ -180,7 +184,7 @@ if "%1" == "version" (
         %SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%;%JC_jEnv%" >null
         @REM echo/%SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%;%JC_jEnv%" >>f:/JC_jEnv.cmd
     )
-    rem 设置别名
+    @REM rem 设置别名
     %SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $*   >null
     @REM echo/%SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $* >>f:/JC_jEnv.cmd
 

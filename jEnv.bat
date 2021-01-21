@@ -2,6 +2,9 @@
 chcp 65001
 @REM AUTHOR: JC0o0l,Jerrybird
 @REM description: java环境切换管理工具
+@REM Repo: https://github.com/Chroblert/JC-jEnv.git
+
+@REM set JC_jEnv=JC_jEnv
 
 if "%1" == "local" (
     echo [+] jenv local alias
@@ -17,6 +20,10 @@ if "%1" == "add" (
     echo [+] jenv add jdk_dir alias
     goto addjdk
 )
+if "%1" == "del" (
+    echo [+] jenv del alias
+    goto deljdk
+)
 
 :usage
     echo jenv [options]
@@ -24,10 +31,18 @@ if "%1" == "add" (
     echo jenv local 1.8 设置java版本，只在当前shell下起作用
     echo jenv global 1.8 设置java版本，在全局下都起作用
     echo jenv add 目录 alias 
+    echo jenv del alias
     goto end
 
-:aliaslist
+:version
 
+    goto end
+@REM 导出配置到文件
+:export
+    goto end
+
+@REM 导入配置文件
+:import
     goto end
 :switch_local
     call refreshenv
@@ -88,7 +103,13 @@ if "%1" == "add" (
     goto :EOF
     @REM reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v JAVA_HOME /t REG_SZ /d "%~1" /f
 
-
+:deljdk
+    @REM 删除某个版本的jdk
+    reg delete HKCU\Environment /v %~2 /f
+    call set t_JC_jEnv=%%JC_jEnv:;%~2=%%
+    call setx JC_jEnv %%t_JC_jEnv:%~2;=%%
+    call set JC_jEnv=%%t_JC_jEnv:%~2;=%%
+    goto refreshenv
 :addjdk
     rem echo [+] jenv add jdk_dir alias
     if "%2" == "" goto end
@@ -96,12 +117,34 @@ if "%1" == "add" (
     set JDK_ALIAS=%3
     set JDK_DIR=%2
     rem 添加至用户环境变量中
-    %SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR%
+    %SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >null
+    echo/%SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >>f:/JC_jEnv.cmd
+    echo "%JC_jEnv%"|%SystemRoot%\system32\findstr "%JDK_ALIAS%" >nul
+    set notexist=%errorlevel%
+    @REM 环境变量中已存在当前要添加JAVA_ALIAS
+    if %notexist% == 0 (
+        echo 已设置过该版本的java
+        goto end
+    )
+    @REM 保存添加的环境变量到JC_jEnv中
+    if "%JC_jEnv%" == "" (
+        echo 用户环境变量中没有JC_jEnv
+        %SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%" >null
+        echo/%SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%" >>f:/JC_jEnv.cmd
+    ) else (
+        %SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%;%JC_jEnv%" >null
+        echo/%SystemRoot%\system32\setx JC_jEnv "%JDK_ALIAS%;%JC_jEnv%" >>f:/JC_jEnv.cmd
+    )
     rem 设置别名
-    %SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $*
+    %SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $*   >null
+    echo/%SystemRoot%\system32\doskey %JDK_ALIAS%=%JDK_DIR%\bin\java.exe $* >>f:/JC_jEnv.cmd
+
     echo 已为%JDK_DIR%\bin\java.exe设置别名%JDK_ALIAS%
-    rem 刷新环境变量
-    call :refreshenv
+    @REM 清空定义的变量
+    @REM set JDK_ALIAS=
+    set JDK_DIR=
+    @REM 刷新环境变量
+    goto refreshenv
 
 :refreshenv
 @echo off
@@ -171,6 +214,7 @@ goto main
 
     echo | set /p dummy="Finished."
     echo .
+    goto :EOF
 
 
 :end

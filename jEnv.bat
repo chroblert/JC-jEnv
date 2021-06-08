@@ -7,7 +7,7 @@ chcp 65001
 @REM set JC_jEnv=JC_jEnv
 
 if "%1" == "local" (
-    echo |set /p JCOut="[+] jenv local alias"
+    echo |set /p JCOut=" [+] jenv local alias"
     echo.
     goto switch_local 
 )
@@ -64,7 +64,7 @@ if "%1" == "version" (
     echo.
     echo | set /p JCOut="         - 设置java版本，在全局下都起作用"
     echo.
-    echo | set /p JCOut="       add 目录 alias "
+    echo | set /p JCOut="       add 目录 alias"
     echo.
     echo | set /p JCOut="         - add a version "
     echo.
@@ -206,7 +206,7 @@ if "%1" == "version" (
     %SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >null
     @REM echo | set /p JCOut="/%SystemRoot%\system32\setx %JDK_ALIAS% %JDK_DIR% >>f:/JC_jEnv.cmd"
     @REM echo.
-    echo | set /p JCOut=" "%JC_jEnv%"|%SystemRoot%\system32\findstr "%JDK_ALIAS%" >nul"
+    echo | set /p JCOut="%JC_jEnv%"|%SystemRoot%\system32\findstr "%JDK_ALIAS%" >nul
     echo.
     set notexist=%errorlevel%
     @REM 环境变量JC_jEnv中已存在当前要添加JAVA_ALIAS

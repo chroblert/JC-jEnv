@@ -74,6 +74,9 @@ options如下
 3. 删除系统环境变量中的JAVA_HOME
    因为生成path环境变量的时候，系统变量中的path>用户环境变量中的path。而要修改系统环境变量，需要管理员权限，所以该程序只修改了用户环境变量。
 
+注：
+> - 系统环境变量中PATH值中的路径下不能有java.exe。如：C:\windows\system32路径下有8版本的java.exe，则全局无法生效，即：即使jenv global java13,但每次新创建的cmd下运行的java都是C:\windows\system32路径下的那个。
+> - 该脚本使用用户环境变量，因而系统环境变量中不能有JAVA_HOME变量
 
 ## 0x05 参考资料：
 

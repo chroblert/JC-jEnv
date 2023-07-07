@@ -75,7 +75,7 @@ if "%1" == "version" (
     goto end
 
 :version
-    if "%JC_jEnv" == "" (
+    if "%JC_jEnv%" == "" (
         echo | set /p JCOut=" 当前没有设置任何版本"
         echo.
         goto usage
@@ -85,23 +85,24 @@ if "%1" == "version" (
     echo | set /p JCOut=" all version:"
     echo.
     set remain=%JC_jEnv%
+    setlocal enabledelayedexpansion
 :loop
     for /f "delims=;, tokens=1*" %%i in ("%remain%") do (
         @REM echo | set /p JCOut=" %%i"
         @REM echo.
-        call set value=%%%%i%%
-        set var=%%i
-        if /i "%value%" equ "%JAVA_HOME%" (
-            echo | set /p JCOut=" * %var% %value%"
+        set jenv_name=%%i
+        set value=!%%i!
+        if /i "!value!" equ "%JAVA_HOME%" (
+            echo | set /p JCOut=" * !jenv_name! !value!"
             echo.
         ) else (
-            echo | set /p JCOut="   %var% %value%"
+            echo | set /p JCOut="   !jenv_name! !value!"
             echo.
         )
         set remain=%%j
-        @REM goto loop
     )
     if defined remain goto :loop
+    setlocal disabledelayedexpansion
     goto end
 @REM 导出配置到文件
 :export
@@ -191,8 +192,26 @@ if "%1" == "version" (
 :addjdk
     rem echo | set /p JCOut=" [+] jenv add jdk_dir alias"
     rem echo.
-    if "%2" == "" goto end
-    if "%2" == "" goto end
+    if [%2] == [] (
+        echo | set /p JCOut=" 请设置JDK路径"
+        echo.
+        goto end
+    )
+    if [%3] == [] (
+        echo | set /p JCOut=" 请设置JDK别名"
+        echo.
+        goto end
+    )
+    if %2 == "" (
+        echo | set /p JCOut=" 请设置JDK路径"
+        echo.
+        goto end
+    )
+    if %3 == "" (
+        echo | set /p JCOut=" 请设置JDK别名"
+        echo.
+        goto end
+    )
     set JDK_ALIAS=%3
     set JDK_DIR=%2
     @REM 判断是否存在JDK_ALIAS别名

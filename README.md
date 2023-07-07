@@ -67,7 +67,7 @@ options如下
 1. 将该bat脚本添加到PATH系统环境变量中
 
     这样使用的时候，可以直接输入`jenv`
-2. PATH中使用%JAVA_HOME%\bin
+2. 用户环境变量PATH中使用%JAVA_HOME%\bin
     
     path环境变量中不能有具体的java路径，要使用%JAVA_HOME%\bin的方式,无论系统环境变量还是用户环境变量
 
@@ -78,7 +78,17 @@ options如下
 > - 系统环境变量中PATH值中的路径下不能有java.exe。如：C:\windows\system32路径下有8版本的java.exe，则全局无法生效，即：即使jenv global java13,但每次新创建的cmd下运行的java都是C:\windows\system32路径下的那个。
 > - 该脚本使用用户环境变量，因而系统环境变量中不能有JAVA_HOME变量
 
-## 0x05 参考资料：
+## 0x05 测试环境
+
+|序号|系统|版本|是否支持|
+|---|-|--|--------|
+|1|Windows 10|专业版|支持|
+|2|  |  |  |
+|3|  |  |  |
+|4|  |  |  |
+
+
+##  参考资料：
 
 参考资料：[windows系统一键配置修改环境变量](https://www.jianshu.com/p/7d90042f644f)
 
